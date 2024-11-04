@@ -7,6 +7,7 @@ export default function App() {
   const [amount, setAmount] = useState(10);
   const [currencyFrom, setCurrencyFrom] = useState("USD");
   const [currencyTo, setCurrencyTo] = useState("EUR");
+  const [result, setResult] = useState();
 
   // 2. useEffect
   // function - fetch,
@@ -25,9 +26,14 @@ export default function App() {
             throw new Error("Something went wrong with fetching currency");
           }
 
+          // need extra case when same currency (USD to USD) - gives error
+
           const data = await res.json();
+          setResult(data.rates[currencyTo]);
+
           console.log("Data: ", data);
-          console.log("Data.rates: ", data.rates);
+          console.log("Data.rates[currencyTo]: ", data.rates[currencyTo]);
+          console.log("Result: ", result);
           console.log("==================");
         } catch (err) {
           console.log(err.message);
@@ -36,8 +42,7 @@ export default function App() {
 
       fetchConversion();
     },
-    // dependency array - include 2 more
-    [amount]
+    [amount, currencyFrom, currencyTo, result]
   );
 
   return (
@@ -47,22 +52,25 @@ export default function App() {
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
       />
-
-      {/* value={query}
-      onChange={(e) => setQuery(e.target.value)} */}
-      <select>
+      <select
+        value={currencyFrom}
+        onChange={(e) => setCurrencyFrom(e.target.value)}
+      >
         <option value="USD">USD</option>
         <option value="EUR">EUR</option>
         <option value="CAD">CAD</option>
         <option value="INR">INR</option>
       </select>
-      <select>
+      <select
+        value={currencyTo}
+        onChange={(e) => setCurrencyTo(e.target.value)}
+      >
         <option value="USD">USD</option>
         <option value="EUR">EUR</option>
         <option value="CAD">CAD</option>
         <option value="INR">INR</option>
       </select>
-      <p>OUTPUT</p>
+      <p>{result}</p>
     </div>
   );
 }
