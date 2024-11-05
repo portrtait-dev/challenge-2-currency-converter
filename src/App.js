@@ -3,40 +3,42 @@
 import { useEffect, useState } from "react";
 
 export default function App() {
-  // 1. controlled elements with useState - input, select, select
   const [amount, setAmount] = useState(10);
   const [currencyFrom, setCurrencyFrom] = useState("USD");
   const [currencyTo, setCurrencyTo] = useState("EUR");
   const [result, setResult] = useState();
+  const [isLoading, setIsLoading] = useState();
 
-  // 2. useEffect
-  // function - fetch,
-  // dependency array - input, select, select
   useEffect(
     function () {
       async function fetchConversion() {
         try {
+          setIsLoading(true);
           const res = await fetch(
-            // `https://api.frankfurter.app/latest?amount=${amount}&from=EUR&to=USD`
-
             `https://api.frankfurter.app/latest?amount=${amount}&from=${currencyFrom}&to=${currencyTo}`
           );
 
           if (!res.ok) {
+            if (currencyFrom === currencyTo) {
+              setResult("You are converting the same currency!");
+            }
+
             throw new Error("Something went wrong with fetching currency");
           }
-
-          // need extra case when same currency (USD to USD) - gives error
 
           const data = await res.json();
           setResult(data.rates[currencyTo]);
 
-          console.log("Data: ", data);
-          console.log("Data.rates[currencyTo]: ", data.rates[currencyTo]);
-          console.log("Result: ", result);
-          console.log("==================");
+          // console.log("Data: ", data);
+          // console.log("Data.rates[currencyTo]: ", data.rates[currencyTo]);
+          // console.log("Result: ", result);
+          // console.log("==================");
+
+          setIsLoading(false);
         } catch (err) {
           console.log(err.message);
+        } finally {
+          setIsLoading(false);
         }
       }
 
@@ -51,10 +53,12 @@ export default function App() {
         type="text"
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
+        disabled={isLoading}
       />
       <select
         value={currencyFrom}
         onChange={(e) => setCurrencyFrom(e.target.value)}
+        disabled={isLoading}
       >
         <option value="USD">USD</option>
         <option value="EUR">EUR</option>
@@ -64,13 +68,16 @@ export default function App() {
       <select
         value={currencyTo}
         onChange={(e) => setCurrencyTo(e.target.value)}
+        disabled={isLoading}
       >
         <option value="USD">USD</option>
         <option value="EUR">EUR</option>
         <option value="CAD">CAD</option>
         <option value="INR">INR</option>
       </select>
-      <p>{result}</p>
+      <p>
+        {result} {currencyTo}
+      </p>
     </div>
   );
 }
